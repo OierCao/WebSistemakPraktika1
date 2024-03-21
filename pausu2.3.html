@@ -1,0 +1,56 @@
+<!--Ikaslearen izen-abizenak: Oier Cao Carral
+    Irakasgaia eta taldea: Web Sistemak, 31
+    Entregatze data: 27/02/2024
+    Lanaren izena: Laborategi1
+    Entregagaiaren deskribapen laburra: Lehen laborategiaren bigarren atalako hirugarren puntuan agertzen den html-a
+-->
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+        <script type="text/javascript">
+            google.charts.load('current', {'packages':['corechart']});
+            google.charts.setOnLoadCallback(feedsData);
+            function feedsData() {
+                var xhttp = new XMLHttpRequest();
+                var uri = "https://api.thingspeak.com/channels/2447172/feeds.json?api_key=QV49L9D34W50DHXK";
+
+                xhttp.onreadystatechange = function() {
+                    if(this.readyState == 4 && this.status == 200) {
+                        var responseData = JSON.parse(xhttp.responseText);
+                        chart(responseData.feeds);
+                    };
+                };
+                // inicializar la petición HTTP
+                xhttp.open("GET", uri, true);
+                // enviar la petición HTTP
+                xhttp.send();
+            };
+
+            function chart(responseData){
+                var tabla = new google.visualization.DataTable();
+                tabla.addColumn('string', 'Data/Ordu');
+                tabla.addColumn('number', 'CPU');
+                tabla.addColumn('number', 'RAM');
+
+                for (var i = 0; i < responseData.length; i++) {
+                    tabla.addRow([responseData[i].created_at, parseFloat(responseData[i].field1), parseFloat(responseData[i].field2)]);
+                }
+                // OPCIONES DE VISUALIZACIÓN: EJE DE ORDENADAS PARA CADA VARIABLE
+                var options = {
+                    title: 'Computer performance', legend: {position: 'bottom'},
+                    curveType: 'function', colors: ['red', 'blue'],
+                    series: {0: {targetAxisIndex: 0}, 1: {targetAxisIndex: 1}},
+                    vAxes: {0: {title: '%CPU'}, 1: {title: '%RAM'}}
+                };
+
+                var lineChart = new google.visualization.LineChart(document.getElementById('chart_div'));
+                lineChart.draw(tabla, options);
+            };
+        </script>
+    </head>
+    <body>
+        <div id="chart_div" style="width: 900px; height: 500px;"></div>
+    </body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+ <script type="text/javascript">
+
+
+   google.charts.load('current', {'packages':['corechart']});
+   google.charts.setOnLoadCallback(feedsData);
+
+
+   function feedsData() {
+     // HTTP deia
+     var xhttp = new XMLHttpRequest();
+     var channelId = "2447172";
+     var apiKey = "QV49L9D34W50DHXK";
+     var uri = "https://api.thingspeak.com/channels/" + channelId + "/feeds.json?api_key=" + apiKey;
+
+
+     xhttp.onreadystatechange = function() {
+       if (this.readyState == 4 && this.status == 200) {
+         var responseData = JSON.parse(xhttp.responseText);
+         drawChart(responseData.feeds);
+       }
+     };
+     xhttp.open("GET", uri, true);
+     xhttp.send();
+   }
+
+
+   function drawChart(data) {
+     var chartData = new google.visualization.DataTable();
+     chartData.addColumn('string', 'Data/Ordu');
+     chartData.addColumn('number', 'CPU');
+     chartData.addColumn('number', 'RAM');
+
+
+     // Datuak jaso eta taulan gehitu
+     for (var i = 0; i < data.length; i++) {
+       chartData.addRow([data[i].created_at, parseFloat(data[i].field1), parseFloat(data[i].field2)]);
+     }
+
+
+     // Datuak adierazteko personalizazioa
+     var options = {
+       title: 'Thingspeak-eko datuen adierazpena',
+       legend: {position: 'bottom'},
+       curveType: 'function',
+       colors: ['red', 'blue'],
+       series: {0: {targetAxisIndex: 0}, 1: {targetAxisIndex: 1}},
+       vAxes: {0: {title: '%CPU'}, 1: {title: '%RAM'}}
+     };
+
+
+     var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+     chart.draw(chartData, options);
+   }
+
+
+ </script>
+</head>
+<body>
+ <div id="chart_div" style="width: 900px; height: 500px;"></div>
+</body>
+</html>
